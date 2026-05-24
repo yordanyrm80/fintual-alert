@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app/fintual_alert_app.dart';
 import 'services/alert_service.dart';
+import 'services/backup_service.dart';
 import 'services/local_store.dart';
 
 Future<void> main() async {
@@ -12,6 +13,14 @@ Future<void> main() async {
 
   final store = LocalStore();
   final state = await store.load();
+  final backup = BackupService();
 
-  runApp(FintualAlertApp(store: store, alerts: alerts, initialState: state));
+  runApp(
+    FintualAlertApp(
+      store: store,
+      alerts: alerts,
+      backup: backup,
+      initialState: state,
+    ),
+  );
 }

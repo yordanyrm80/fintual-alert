@@ -8,10 +8,12 @@ La primera version se enfoca en el PPR con perfil 100% acciones/Risky:
 - objetivo anual configurable, por defecto 15,000 MXN
 - tope mensual deducible de referencia, por defecto 1,800 MXN
 - registro local de depositos
+- almacenamiento local en SQLite
+- exportacion/importacion de respaldo JSON para mover los mismos datos entre escritorio y telefono
 - semaforo de oportunidad: normal, buen momento o muy buen momento
 - notificacion local cuando las senales guardadas marcan una oportunidad muy buena
 
-No usa backend ni APIs externas en esta version. Los datos se guardan en el dispositivo con `shared_preferences`.
+No usa backend ni APIs externas en esta version. Los datos se guardan en SQLite dentro del dispositivo.
 
 ## Desarrollo
 

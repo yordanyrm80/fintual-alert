@@ -5,6 +5,7 @@ import '../models/deposit.dart';
 import '../models/market_data.dart';
 import '../models/settings_data.dart';
 import '../services/alert_service.dart';
+import '../services/backup_service.dart';
 import '../services/local_store.dart';
 import '../services/opportunity_engine.dart';
 import '../widgets/deposit_dialog.dart';
@@ -19,11 +20,13 @@ class HomePage extends StatefulWidget {
     super.key,
     required this.store,
     required this.alerts,
+    required this.backup,
     required this.initialState,
   });
 
   final LocalStore store;
   final AlertService alerts;
+  final BackupService backup;
   final AppState initialState;
 
   @override
@@ -91,6 +94,30 @@ class _HomePageState extends State<HomePage> {
     if (deposit != null) await _addDeposit(deposit);
   }
 
+  Future<void> _exportBackup() async {
+    final path = await widget.backup.exportState(_state);
+    if (!mounted || path == null) return;
+    _showMessage('Respaldo exportado.');
+  }
+
+  Future<void> _importBackup() async {
+    try {
+      final imported = await widget.backup.importState();
+      if (imported == null) return;
+      setState(() => _state = imported);
+      await _save(checkAlert: false);
+      if (mounted) _showMessage('Respaldo importado.');
+    } on FormatException catch (error) {
+      if (mounted) _showMessage(error.message);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.sizeOf(context).width >= 960;
@@ -98,6 +125,16 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Fintual Alert'),
         actions: [
+          IconButton(
+            tooltip: 'Importar respaldo',
+            onPressed: _importBackup,
+            icon: const Icon(Icons.upload_file_outlined),
+          ),
+          IconButton(
+            tooltip: 'Exportar respaldo',
+            onPressed: _exportBackup,
+            icon: const Icon(Icons.download_outlined),
+          ),
           IconButton(
             tooltip: 'Agregar deposito',
             onPressed: _openDepositDialog,

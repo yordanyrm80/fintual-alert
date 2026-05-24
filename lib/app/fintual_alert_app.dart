@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/app_state.dart';
 import '../screens/home_page.dart';
 import '../services/alert_service.dart';
+import '../services/backup_service.dart';
 import '../services/local_store.dart';
 
 class FintualAlertApp extends StatelessWidget {
@@ -10,11 +11,13 @@ class FintualAlertApp extends StatelessWidget {
     super.key,
     required this.store,
     required this.alerts,
+    required this.backup,
     required this.initialState,
   });
 
   final LocalStore store;
   final AlertService alerts;
+  final BackupService backup;
   final AppState initialState;
 
   @override
@@ -40,7 +43,12 @@ class FintualAlertApp extends StatelessWidget {
           ),
         ),
       ),
-      home: HomePage(store: store, alerts: alerts, initialState: initialState),
+      home: HomePage(
+        store: store,
+        alerts: alerts,
+        backup: backup,
+        initialState: initialState,
+      ),
     );
   }
 }
