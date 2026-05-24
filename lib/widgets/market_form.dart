@@ -70,7 +70,10 @@ class _MarketFormState extends State<MarketForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Mercado', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Ajuste manual',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 12),
             NumberField(
               controller: _drawdown,

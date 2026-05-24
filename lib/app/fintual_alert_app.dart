@@ -5,6 +5,7 @@ import '../screens/home_page.dart';
 import '../services/alert_service.dart';
 import '../services/backup_service.dart';
 import '../services/local_store.dart';
+import '../services/market_data_service.dart';
 
 class FintualAlertApp extends StatelessWidget {
   const FintualAlertApp({
@@ -12,12 +13,14 @@ class FintualAlertApp extends StatelessWidget {
     required this.store,
     required this.alerts,
     required this.backup,
+    required this.marketData,
     required this.initialState,
   });
 
   final LocalStore store;
   final AlertService alerts;
   final BackupService backup;
+  final MarketDataService marketData;
   final AppState initialState;
 
   @override
@@ -47,6 +50,7 @@ class FintualAlertApp extends StatelessWidget {
         store: store,
         alerts: alerts,
         backup: backup,
+        marketData: marketData,
         initialState: initialState,
       ),
     );

@@ -12,12 +12,14 @@ class DashboardSummary extends StatelessWidget {
     required this.result,
     required this.onAddDeposit,
     required this.onUpdateMarket,
+    required this.refreshingMarket,
   });
 
   final AppState state;
   final OpportunityResult result;
   final VoidCallback onAddDeposit;
   final VoidCallback onUpdateMarket;
+  final bool refreshingMarket;
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +81,14 @@ class DashboardSummary extends StatelessWidget {
                   label: const Text('Registrar deposito'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: onUpdateMarket,
-                  icon: const Icon(Icons.tune),
-                  label: const Text('Actualizar mercado'),
+                  onPressed: refreshingMarket ? null : onUpdateMarket,
+                  icon: refreshingMarket
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.sync),
+                  label: const Text('Actualizar en vivo'),
                 ),
               ],
             ),

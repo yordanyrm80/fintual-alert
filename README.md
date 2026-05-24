@@ -4,7 +4,7 @@ App Flutter para dar seguimiento local a decisiones de inversion en Fintual.
 
 La primera version se enfoca en el PPR con perfil 100% acciones/Risky:
 
-- captura de senales locales de mercado: caida desde maximos, VIX y USD/MXN
+- lectura en vivo de senales de mercado: caida del S&P 500 desde maximos recientes, VIX y USD/MXN
 - objetivo anual configurable, por defecto 15,000 MXN
 - tope mensual deducible de referencia, por defecto 1,800 MXN
 - registro local de depositos
@@ -13,7 +13,7 @@ La primera version se enfoca en el PPR con perfil 100% acciones/Risky:
 - semaforo de oportunidad: normal, buen momento o muy buen momento
 - notificacion local cuando las senales guardadas marcan una oportunidad muy buena
 
-No usa backend ni APIs externas en esta version. Los datos se guardan en SQLite dentro del dispositivo.
+No usa backend propio ni base remota. Lee datos publicos de mercado en internet y guarda la informacion en SQLite dentro del dispositivo.
 
 ## Desarrollo
 

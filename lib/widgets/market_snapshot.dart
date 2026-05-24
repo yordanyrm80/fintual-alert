@@ -4,10 +4,18 @@ import '../models/market_data.dart';
 import '../utils/formatters.dart';
 
 class MarketSnapshot extends StatelessWidget {
-  const MarketSnapshot({super.key, required this.market, required this.onEdit});
+  const MarketSnapshot({
+    super.key,
+    required this.market,
+    required this.onEdit,
+    required this.onRefresh,
+    required this.refreshing,
+  });
 
   final MarketData market;
   final VoidCallback onEdit;
+  final VoidCallback onRefresh;
+  final bool refreshing;
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +36,33 @@ class MarketSnapshot extends StatelessWidget {
                   ),
                 ),
                 IconButton.outlined(
-                  tooltip: 'Actualizar mercado',
+                  tooltip: 'Actualizar en vivo',
+                  onPressed: refreshing ? null : onRefresh,
+                  icon: refreshing
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.sync),
+                ),
+                const SizedBox(width: 8),
+                IconButton.outlined(
+                  tooltip: 'Ajuste manual',
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            _Row(label: 'Caida desde maximo', value: '${market.drawdown}%'),
+            Text(
+              'Datos leidos en vivo desde internet. Puedes ajustar manualmente si hace falta.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            _Row(
+              label: 'Caida desde maximo',
+              value: '${market.drawdown.toStringAsFixed(1)}%',
+            ),
             _Row(label: 'VIX', value: market.vix.toStringAsFixed(1)),
             _Row(label: 'USD/MXN', value: market.usdMxn.toStringAsFixed(2)),
             _Row(

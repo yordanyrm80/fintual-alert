@@ -8,10 +8,12 @@ import '../screens/plan_page.dart';
 import '../services/alert_service.dart';
 import '../services/backup_service.dart';
 import '../services/local_store.dart';
+import '../services/market_data_service.dart';
 import '../services/opportunity_engine.dart';
 import '../widgets/dashboard_summary.dart';
 import '../widgets/deposit_dialog.dart';
 import '../widgets/deposits_panel.dart';
+import '../widgets/formula_panel.dart';
 import '../widgets/market_form.dart';
 import '../widgets/market_snapshot.dart';
 import '../widgets/signals_panel.dart';
@@ -22,12 +24,14 @@ class HomePage extends StatefulWidget {
     required this.store,
     required this.alerts,
     required this.backup,
+    required this.marketData,
     required this.initialState,
   });
 
   final LocalStore store;
   final AlertService alerts;
   final BackupService backup;
+  final MarketDataService marketData;
   final AppState initialState;
 
   @override
@@ -36,6 +40,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late AppState _state;
+  bool _refreshingMarket = false;
 
   OpportunityResult get _result => OpportunityEngine.evaluate(_state);
 
@@ -72,6 +77,21 @@ class _HomePageState extends State<HomePage> {
   Future<void> _updateMarket(MarketData market) async {
     setState(() => _state = _state.copyWith(market: market));
     await _save();
+  }
+
+  Future<void> _refreshMarket() async {
+    setState(() => _refreshingMarket = true);
+    try {
+      final market = await widget.marketData.fetch();
+      await _updateMarket(market);
+      if (mounted) _showMessage('Mercado actualizado en vivo.');
+    } on MarketDataException catch (error) {
+      if (mounted) _showMessage(error.message);
+    } catch (_) {
+      if (mounted) _showMessage('No se pudo actualizar el mercado.');
+    } finally {
+      if (mounted) setState(() => _refreshingMarket = false);
+    }
   }
 
   Future<void> _addDeposit(Deposit deposit) async {
@@ -220,10 +240,13 @@ class _HomePageState extends State<HomePage> {
           state: _state,
           result: _result,
           onAddDeposit: _openDepositDialog,
-          onUpdateMarket: _openMarketDialog,
+          onUpdateMarket: _refreshMarket,
+          refreshingMarket: _refreshingMarket,
         ),
         const SizedBox(height: 16),
         SignalsPanel(state: _state, result: _result),
+        const SizedBox(height: 16),
+        const FormulaPanel(),
       ],
     );
   }
@@ -231,7 +254,12 @@ class _HomePageState extends State<HomePage> {
   Widget _sideColumn() {
     return Column(
       children: [
-        MarketSnapshot(market: _state.market, onEdit: _openMarketDialog),
+        MarketSnapshot(
+          market: _state.market,
+          onEdit: _openMarketDialog,
+          onRefresh: _refreshMarket,
+          refreshing: _refreshingMarket,
+        ),
         const SizedBox(height: 16),
         DepositsPanel(deposits: _state.deposits, onDelete: _deleteDeposit),
       ],
