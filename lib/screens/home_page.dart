@@ -4,16 +4,17 @@ import '../models/app_state.dart';
 import '../models/deposit.dart';
 import '../models/market_data.dart';
 import '../models/settings_data.dart';
+import '../screens/plan_page.dart';
 import '../services/alert_service.dart';
 import '../services/backup_service.dart';
 import '../services/local_store.dart';
 import '../services/opportunity_engine.dart';
+import '../widgets/dashboard_summary.dart';
 import '../widgets/deposit_dialog.dart';
 import '../widgets/deposits_panel.dart';
 import '../widgets/market_form.dart';
-import '../widgets/settings_form.dart';
+import '../widgets/market_snapshot.dart';
 import '../widgets/signals_panel.dart';
-import '../widgets/status_panel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -94,6 +95,33 @@ class _HomePageState extends State<HomePage> {
     if (deposit != null) await _addDeposit(deposit);
   }
 
+  Future<void> _openMarketDialog() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => _MarketSheet(
+        market: _state.market,
+        onChanged: (market) async {
+          Navigator.of(context).pop();
+          await _updateMarket(market);
+        },
+      ),
+    );
+  }
+
+  Future<void> _openPlanPage() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => PlanPage(
+          settings: _state.settings,
+          onChanged: _updateSettings,
+          onTestAlert: () => widget.alerts.showOpportunity(_result),
+        ),
+      ),
+    );
+  }
+
   Future<void> _exportBackup() async {
     final path = await widget.backup.exportState(_state);
     if (!mounted || path == null) return;
@@ -125,6 +153,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Fintual Alert'),
         actions: [
+          IconButton(
+            tooltip: 'Plan',
+            onPressed: _openPlanPage,
+            icon: const Icon(Icons.settings_outlined),
+          ),
           IconButton(
             tooltip: 'Importar respaldo',
             onPressed: _importBackup,
@@ -183,10 +216,11 @@ class _HomePageState extends State<HomePage> {
   Widget _mainColumn() {
     return Column(
       children: [
-        StatusPanel(
+        DashboardSummary(
           state: _state,
           result: _result,
           onAddDeposit: _openDepositDialog,
+          onUpdateMarket: _openMarketDialog,
         ),
         const SizedBox(height: 16),
         SignalsPanel(state: _state, result: _result),
@@ -197,16 +231,35 @@ class _HomePageState extends State<HomePage> {
   Widget _sideColumn() {
     return Column(
       children: [
-        MarketForm(market: _state.market, onChanged: _updateMarket),
-        const SizedBox(height: 16),
-        SettingsForm(
-          settings: _state.settings,
-          onChanged: _updateSettings,
-          onTestAlert: () => widget.alerts.showOpportunity(_result),
-        ),
+        MarketSnapshot(market: _state.market, onEdit: _openMarketDialog),
         const SizedBox(height: 16),
         DepositsPanel(deposits: _state.deposits, onDelete: _deleteDeposit),
       ],
+    );
+  }
+}
+
+class _MarketSheet extends StatelessWidget {
+  const _MarketSheet({required this.market, required this.onChanged});
+
+  final MarketData market;
+  final ValueChanged<MarketData> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: MarketForm(market: market, onChanged: onChanged),
+        ),
+      ),
     );
   }
 }
